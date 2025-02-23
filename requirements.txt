@@ -8,3 +8,4 @@ nest-asyncio
 python-dotenv
 google-generativeai
 pydantic
+flask_cors
