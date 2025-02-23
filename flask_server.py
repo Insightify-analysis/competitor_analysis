@@ -147,9 +147,9 @@ def company_post():
 @app.route("/company_json", methods=["POST"])
 def company_json_post():
     data = request.get_json()
-    if not data or "company" not in data:
+    if not data or "query" not in data:
         return jsonify({"error": "Missing 'company' in JSON payload"}), 400
-    company_name = data["company"]
+    company_name = data["query"]
     clean_param = data.get("clean", False)
     try:
         result = run_async_task(
