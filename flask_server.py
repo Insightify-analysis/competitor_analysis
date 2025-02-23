@@ -4,6 +4,7 @@ import os
 import json
 from app import CompanyCategorizerApp
 import threading
+from dotenv import load_dotenv  # added import for dotenv
 
 app = Flask(__name__)
 instance = CompanyCategorizerApp()
@@ -139,6 +140,8 @@ def post_json_result(data):
 
 
 if __name__ == "__main__":
+    load_dotenv()  # load environment variables from .env file
     # Determine debug mode from environment variable for production readiness
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    app.run(debug=debug_mode)
+    port = int(os.getenv("PORT", 5000))  # get port from .env file (default 5000)
+    app.run(debug=debug_mode, port=port)
