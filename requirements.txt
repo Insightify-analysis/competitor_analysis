@@ -10,3 +10,4 @@ google-generativeai
 pydantic
 flask_cors
 yfinance
+redis>=4.5.1
