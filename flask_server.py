@@ -144,4 +144,5 @@ if __name__ == "__main__":
     # Determine debug mode from environment variable for production readiness
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     port = int(os.getenv("PORT", 5000))  # get port from .env file (default 5000)
-    app.run(debug=debug_mode, port=port)
+    # Bind to 0.0.0.0 to allow external access on Render
+    app.run(debug=debug_mode, host="0.0.0.0", port=port)
