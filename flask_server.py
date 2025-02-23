@@ -40,7 +40,7 @@ def health_check():
     return jsonify({"status": "ok"}), 200
 
 
-@app.route("/categorize", methods=["GET"])
+@app.route("/categorize", methods=["POST"])
 def categorize_endpoint():
     company_name = request.args.get("query")
     if not company_name:
@@ -137,6 +137,32 @@ def post_json_result(data):
     except Exception as e:
         logger.error(f"Failed to post JSON result: {e}")
         return None
+
+
+@app.route("/json", methods=["GET", "POST"])
+def json_response():
+    if request.method == "POST":
+        data = request.get_json()
+        if not data or not data.get("company"):
+            return jsonify({"error": "Missing company name"}), 400
+        company_name = data["company"]
+    else:  # GET request
+        company_name = request.args.get("company")
+        if not company_name:
+            return (
+                jsonify(
+                    {
+                        "message": "Provide a company parameter, e.g., /json?company=YourCompany"
+                    }
+                ),
+                200,
+            )
+    result = {
+        "company": company_name,
+        "analysis": {"step1": "processing...", "step2": "processing..."},
+        "final_result": "Category X",
+    }
+    return jsonify(result)
 
 
 if __name__ == "__main__":
