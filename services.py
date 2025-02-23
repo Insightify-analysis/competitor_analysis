@@ -18,12 +18,16 @@ def get_ticker_from_name(company_name):
         return None
 
 
-def get_company_financials(ticker):
+def get_company_financials(company_name):
     try:
+        ticker = get_ticker_from_name(company_name)
+        if not ticker:
+            logger.error(f"Could not find ticker for company: {company_name}")
+            return None
+
         stock = yf.Ticker(ticker)
         info = stock.info
 
-        # ...existing code building company_info...
         company_info = {
             "Company Name": info.get("longName", "N/A"),
             "Sector": info.get("sector", "N/A"),
@@ -34,7 +38,6 @@ def get_company_financials(ticker):
             "Full Time Employees": info.get("fullTimeEmployees", "N/A"),
         }
 
-        # ...existing code building market_data...
         market_data = {
             "Market Cap": info.get("marketCap", "N/A"),
             "Current Price": info.get("currentPrice", "N/A"),
@@ -46,7 +49,6 @@ def get_company_financials(ticker):
             "Average Volume": info.get("averageVolume", "N/A"),
         }
 
-        # ...existing code building financial_metrics...
         financial_metrics = {
             "PE Ratio": info.get("trailingPE", "N/A"),
             "Forward PE": info.get("forwardPE", "N/A"),
@@ -58,7 +60,6 @@ def get_company_financials(ticker):
             "Beta": info.get("beta", "N/A"),
         }
 
-        # ...existing code building income_statement...
         income_statement = {
             "Revenue": info.get("totalRevenue", "N/A"),
             "Revenue Growth": info.get("revenueGrowth", "N/A"),
@@ -70,7 +71,6 @@ def get_company_financials(ticker):
             "Gross Margin": info.get("grossMargins", "N/A"),
         }
 
-        # ...existing code building balance_sheet...
         balance_sheet = {
             "Total Cash": info.get("totalCash", "N/A"),
             "Total Debt": info.get("totalDebt", "N/A"),
@@ -81,7 +81,6 @@ def get_company_financials(ticker):
             "Book Value": info.get("bookValue", "N/A"),
         }
 
-        # ...existing code building dividend_info...
         dividend_info = {
             "Dividend Rate": info.get("dividendRate", "N/A"),
             "Dividend Yield": info.get("dividendYield", "N/A"),
@@ -90,6 +89,7 @@ def get_company_financials(ticker):
         }
 
         return {
+            "ticker": ticker,
             "company_info": company_info,
             "market_data": market_data,
             "financial_metrics": financial_metrics,
@@ -98,7 +98,7 @@ def get_company_financials(ticker):
             "dividend_info": dividend_info,
         }
     except Exception as e:
-        logger.error(f"Error fetching financial data for ticker {ticker}: {e}")
+        logger.error(f"Error fetching financial data for company {company_name}: {e}")
         return None
 
 
@@ -114,7 +114,5 @@ def get_competitors(company_name, wikidata_id=None, ticker=None, industry=None):
         except Exception:
             pass
     if not competitors:
-        # In this simple integration, we assume that if no competitors from ticker,
-        # an empty list is returned (or a default message).
         competitors = []
     return competitors or ["No competitors found"]
