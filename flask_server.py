@@ -6,6 +6,11 @@ import requests
 import logging
 from dotenv import load_dotenv
 from app import CompanyCategorizerApp
+from flask_cors import CORS, cross_origin
+from flask_cors import CORS
+
+CORS(app)
+
 
 app = Flask(__name__)
 instance = CompanyCategorizerApp()
@@ -145,6 +150,7 @@ def company_post():
 
 
 @app.route("/company_json", methods=["POST"])
+@cross_origin()
 def company_json_post():
     data = request.get_json()
     if not data or "query" not in data:
