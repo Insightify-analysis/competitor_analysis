@@ -21,17 +21,8 @@ from wikidata import (
 )  # added from router.py
 
 app = Flask(__name__)
-CORS(
-    app,
-    resources={
-        r"/*": {
-            "origins": "*",
-            "methods": ["GET", "POST", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization", "Accept"],
-            "expose_headers": ["Content-Type"],
-        }
-    },
-)
+CORS(app)
+
 
 app = Flask(__name__)
 instance = CompanyCategorizerApp()
@@ -173,24 +164,18 @@ def company_post():
 @app.route("/company_json", methods=["POST"])
 @cross_origin()
 def company_json_post():
-    if not request.is_json:
-        return jsonify({"error": "Content-Type must be application/json"}), 415
+    data = request.get_json()
+    if not data or "query" not in data:
+        return jsonify({"error": "Missing 'company' in JSON payload"}), 400
+    company_name = data["query"]
+    clean_param = data.get("clean", False)
     try:
-        data = request.get_json()
-        if not data or "query" not in data:
-            return jsonify({"error": "Missing 'company' in JSON payload"}), 400
-        company_name = data["query"]
-        clean_param = data.get("clean", False)
-        try:
-            result = run_async_task(
-                instance.categorizer.categorize_company(
-                    company_name, clean_output=clean_param
-                )
+        result = run_async_task(
+            instance.categorizer.categorize_company(
+                company_name, clean_output=clean_param
             )
-            return jsonify({"result": result})
-        except Exception as e:
-            logger.error(f"/company_json error: {e}")
-            return jsonify({"error": str(e)}), 500
+        )
+        return jsonify({"result": result})
     except Exception as e:
         logger.error(f"/company_json error: {e}")
         return jsonify({"error": str(e)}), 500
@@ -199,19 +184,17 @@ def company_json_post():
 @app.route("/api/yfinance", methods=["POST"])
 @cross_origin()
 def yfinance_data():
-    if not request.is_json:
-        return jsonify({"error": "Content-Type must be application/json"}), 415
     try:
         data = request.get_json()
-        if not data or "company_name" not in data:
-            return jsonify({"error": "Missing company_name in request body"}), 400
+        if not data or "ticker" not in data:
+            return jsonify({"error": "Missing ticker in request body"}), 400
 
-        company_name = data["company_name"].strip()
-        financial_data = get_company_financials(company_name)
+        ticker = data["ticker"].strip()
+        financial_data = get_company_financials(ticker)
         if not financial_data:
             return jsonify({"error": "Could not fetch financial data"}), 500
 
-        return jsonify({"company_name": company_name, "financial_data": financial_data})
+        return jsonify({"ticker": ticker, "financial_data": financial_data})
     except Exception as e:
         app.logger.exception("Unhandled exception in /api/yfinance")
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
@@ -220,8 +203,6 @@ def yfinance_data():
 @app.route("/api/company_analysis", methods=["POST"])
 @cross_origin()
 def company_analysis():
-    if not request.is_json:
-        return jsonify({"error": "Content-Type must be application/json"}), 415
     try:
         data = request.get_json()
         if not data or "company_name" not in data:
